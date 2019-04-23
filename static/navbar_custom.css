@@ -1,0 +1,89 @@
+ body {
+  padding-top: 77.4px;
+}
+/*
+.nav-link {
+   color: white;
+   transition: color .15s ease-in-out;
+   -moz-transition: color .15s ease-in-out;
+   -webkit-transition: color .15s ease-in-out;
+}*/
+
+.nav-link {
+  position: relative;
+  text-decoration: none;
+  color: white !important;
+  transition: color .15s ease-in-out;
+  -moz-transition: color .15s ease-in-out;
+  -webkit-transition: color .15s ease-in-out;
+}
+
+.dropdown-item {
+  color:#212529 !important;
+}
+.nav-link:before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: orange;
+  visibility: hidden;
+  -webkit-transform: scaleX(0);
+  transform: scaleX(0);
+  -webkit-transition: all 0.2s ease-in-out 0s;
+  transition: all 0.2s ease-in-out 0s;
+}
+.nav-link:hover:before {
+  visibility: visible;
+  -webkit-transform: scaleX(1);
+  transform: scaleX(1);
+  
+}
+.nav-link:hover {
+  color:orange !important;
+}
+.navbar .navbar-nav > .aktiv a {
+  color:orange !important;
+}
+
+	/*.navbar-header { margin:auto; } /*For midt på horisontalt*/
+	nav img { padding-right: 7px; } /* For å flytte teksten litt vekk fra biuldet */
+	
+	./*navbar-nav	 { margin:auto; } /* Plassering midt på horisontalat*/
+	/*.nav-item  { padding: 10px; font-size: 100%;} /*Plassere li element på linje*/
+
+.dropdown-menu {
+    background-color: #212529;
+    padding-right: 10px;
+  }
+
+.dropdown .dropdown-menu {
+    -webkit-transition: all 0.2s;
+    -moz-transition: all 0.2s;
+    -ms-transition: all 0.2s;
+    -o-transition: all 0.2s;
+    transition: all 0.2s;
+
+    max-height: 0;
+    display: block;
+    overflow: hidden;
+    opacity: 0;
+}
+
+.dropdown:hover .dropdown-menu {
+    max-height: 200px;
+    opacity: 1;
+} 
+
+@media (min-width: 879px) {
+.navbar-nav > li {
+	padding-right: 7px;
+	padding-left: 7px;
+  font-size: 110%;
+  }
+
+  .dropdown-menu .dropdown-divider {
+    border-color: 1px solid rgba(0, 0, 0, .12);
+  }
