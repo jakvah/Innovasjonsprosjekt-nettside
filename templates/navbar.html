@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+		<link rel="icon" href="{{ url_for('static', filename='bilder/droplet.png')}}">
+    <!-- Fa Fa Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<!--Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit = no">
+		<!-- Bootstrap CSS -->
+		<!--<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">-->
+		<!-- Custom CSS for justering av visse prefixed element -->
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='navbar_custom.css')}}">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+</head>
+<script type="text/javascript">
+  /* Sample function that returns boolean in case the browser is Internet Explorer*/
+function isIE() {
+  ua = navigator.userAgent;
+  /* MSIE used to detect old browsers and Trident used to newer ones*/
+  var is_ie = ua.indexOf("MSIE ") > -1 || ua.indexOf("Trident/") > -1;
+  
+  return is_ie; 
+}
+/* Create an alert to show if the browser is IE or not */
+if (isIE()){
+    alert('Vi har oppdaget at du bruker Internet Explorer som nettleser. Denne nettsiden benytter funksjoner som ikke støttes av denne nettleseren. Vi anbefaler deg å bytte til en annen nettleser som f.eks Google Chrome eller Mozilla Firefox for den fulle brukeropplevelsen.');
+}
+</script>
+
+
+<!-- Setter tabs til navbar. -->
+{% set navigation_bar = [
+      		('/','home','Dashboard'),
+      		('/hisdat','data','Dataarkiv'),
+      		('/email','email','Registrer epost'),
+      		('/om','contact','Om oss')
+      		] 
+%}
+
+<body>
+
+<!--Navbar-->
+<nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark"> <!-- navbar-dark bg-dark -->	
+	<div class="container-fluid">
+		<!-- Synlig for mer enn 576 px --> 
+		<div class="navbar-header d-none d-sm-block">
+  			<a class="navbar-brand" href="/">
+    		<img src="/static/bilder/droplet.png" width="30" alt="elsysLogo">
+     		Vannovervåkning i Trondheim</a> 
+    	</div>
+    	<div class="navbar-header d-block d-sm-none">
+  			<a class="navbar-brand" href="/">
+    		<img src="/static/bilder/droplet.png" width="30" alt="elsysLogo">VT</a> 
+    	</div>
+
+    
+   		
+   		<!-- For skjermstr sm (mobil/ipad) -->
+     	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ulElements" aria-controls="ulElements" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+		<div class="hidden-md-down collapse navbar-collapse" id="ulElements">
+    		<ul class="navbar-nav ml-auto">
+    			
+          {% for href, id, caption in navigation_bar %}
+    			<li {% if id == active_page %} class="nav-item aktiv"
+    				{% else %} class="nav-item" {% endif %}>
+    				<a class="nav-link" href="{{ href|e }}">
+    				{% if id == "email" %} <i class="fa fa-envelope"></i>
+            {% elif id == "contact" %} <i class="fa fa-users"></i>
+            {% elif id == "data" %} <i class="fa fa-archive"></i>
+            {% elif id == "home" %} <i class="fa fa-line-chart"></i>
+             {% endif %}  
+
+    				 {{ caption|e }} 
+                  
+                
+            
+            
+
+
+            </a>
+    			</li>
+    		{% endfor %}
+          
+          <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Elver
+              </a>
+              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                  <a class="nav-link dropdown-item" href="#">Nidelva </a>
+                  <a class="nav-link dropdown-item" href="#">Gløselva</a>
+                  <a class="nav-link dropdown-item" href="#">Mjøsa LOL XD</a>
+                  <div class="dropdown-divider"></div>
+                    <a class="nav-link dropdown-item" href="#">Noe om alle elver</a>
+                  </div>
+              </div>
+        </li>
+    		</ul>
+    </div>
+
+ </nav>
+
+</body>
+</html>
+ 
+{% block body %} {% endblock %}
+
+<!-- Henter footer -->
+{% extends "footer.html" %}

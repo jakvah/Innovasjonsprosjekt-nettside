@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<head>	
+	<!--Custom CSS -->
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'hisdat.css') }}">
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">
+  <title>Historiske data</title>
+ 
+
+</head>
+
+<!-- Henter navbar.html -->
+{% extends "navbar.html" %}
+
+<!-- Setter aktiv side til denne siden -->
+{% set active_page = "data" %}
+
+<!-- Dette dokumentet starter -->
+{% block body %}
+
+<!-- Autoscroll på lasting av data -->
+{% if datastatus: %}
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+  <body onload="window.location.hash = 'graphHeading'">
+{% endif %}
+
+
+<link href="https://fonts.googleapis.com/css?family=Fira+Sans" rel="stylesheet">
+{% if not datastatus %}<div class="wrapper" style="height: 100vh;">{% endif %}
+<!-- Datepickers og radio buttons i velger -->
+<div class="container" style="max-width: 1400px;">
+  <div class="overskrift">
+<h2>Velg ønsket dato eller periode</h2>
+</div>
+<div class="velger">
+	<form action="/hisdat" method="POST">
+	  
+	  <input type="radio" id="featured1" name="featured" value="dato" {{ dato_checked }} >
+	  <label for="featured1"><strong>Spesifikk dag</strong></label>
+
+	  <input type="radio" id="month" name="featured" value="mnd" {{ month_checked }}>
+	  <label for="month"><strong>Spesifikk måned</strong></label>		  
+
+	  <input type="radio" id="featured-2" value="periode" name="featured" {{ periode_checked }}>
+	  <label for="featured-2"><strong>Egendefinert periode</strong></label>
+
+    <span  id="graphHeading"></span>
+	  
+    <div class="pickers">	
+	    <span class="fra_title periodein"><strong> Fra:</strong></span>
+	    <span class="shower"><strong>Velg dato:</strong></span>
+	    <input class="datoslide" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" name="start" placeholder= "Velg dato">
+	    <button class="btn btn-primary shower datoslide" type="submit">Vis data</button>
+
+		<label for="inputState"></label>
+		<span class="mntslct"><strong>Velg måned:</strong></span>
+		    <select name="month" id="inputState" class="form-control mntslct">
+		        			<option disabled selected>Velg måned</option>
+		        			<option value="jan">Januar</option>
+		        			<option value="feb">Februar</option>
+		        			<option value="mar">Mars</option>
+		        			<option value="apr">April</option>
+		        			<option value="mai">Mai</option>
+		        			<option value="jun">Juni</option>
+		        			<option value="jul">Juli</option>
+		        			<option value="aug">August</option>
+		        			<option value="sep">September</option>
+		        			<option value="okt">Oktober</option>
+		        			<option value="nov">November</option>
+		        			<option value="des">Desember</option>
+		    </select>
+		<label for="inputState"></label>
+		    <select name="year" id="inputState" class="form-control mntslct">
+		      				<option disabled selected="">Velg år</option>
+		      				<option value="18">2018</option>
+                  <option value="19">2019</option>
+                  <option value="20">2020</option>
+		      			
+		</select>
+		<button style="margin-bottom:6.5px;" class="btn btn-primary mntslct" type="submit">Vis data</button>
+
+	    <span class="periodein"><strong>Til:</strong></span>
+	    <input class="periodein" type="text" name="slutt" onfocus="(this.type='date')" onblur="(this.type='text')" placeholder="Velg dato">
+	    <button class="btn btn-primary periodein slidein" type="submit">Vis data</button>
+	   </div>
+	</form>
+</div>
+</div>
+  
+<!-- Fade in for at hele driten fader inn ved lasting. Tracking expand til title -->
+<div class="fade-in">
+  {% if datastatus %}
+  <!-- Div til grafer-->
+  <div class="container" style="max-width: 1400px;">
+       <div id="HASH"class="overskrift_data tracking-in-expand"> 
+        <span id="entype"><h2> {{ data_header_sql }}</h2></span>  
+        <span id="enannentype"><h2><a style="font-size:22px;color:#0d440c;" href="{{ download_url }}">Last ned data <i class="fa fa-download"></i></a></h2></span>
+      </div>
+    <div id="accordion" style="margin-bottom: 10px;">
+<div class="card">
+    <div class="card-header" id="headingThree">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          <strong>{{ accordion_header }}</strong> <i class="fa fa-plus-square"></i>
+        </button>
+      </h5>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+      <div class="card-body">
+        <div class="row">
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-danger">
+                  Høyeste Temperatur
+                </div>
+                <div class="card-body">
+                  <strong>{{ max_temp_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ max_temp_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-danger">
+                  Høyeste PH
+                </div>
+                <div class="card-body">
+                  <strong>{{ max_ph_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ max_ph_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-danger">
+                  Høyeste TDS
+                </div>
+                <div class="card-body">
+                  <strong>{{ max_kond_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ max_kond_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-danger">
+                  Høyeste Turbiditet
+                </div>
+                <div class="card-body">
+                  <strong>{{ max_turb_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ max_turb_date }}
+                </div>
+              </div>
+          </div>
+        </div>
+
+
+        <div class="row" style="margin-top: 10px;">
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-primary">
+                  Minste Temperatur
+                </div>
+                <div class="card-body">
+                  <strong>{{ min_temp_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ min_temp_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-primary">
+                  Minste Ph
+                </div>
+                <div class="card-body">
+                  <strong>{{ min_ph_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ min_ph_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-primary">
+                  Minste TDS
+                </div>
+                <div class="card-body">
+                  <strong>{{ min_kond_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ min_kond_date }}
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white bg-primary">
+                  Minste Turbiditet
+                </div>
+                <div class="card-body">
+                  <strong>{{ min_turb_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  {{ min_turb_date }}
+                </div>
+              </div>
+          </div>
+        </div>
+         <div class="row" style="margin-top: 10px;">
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white" style="background: -webkit-linear-gradient(left, #007bff, #dc3545);">
+                  Differanse Temperatur
+                </div>
+                <div class="card-body">
+                  <strong>{{ diff_temp_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  <span {% if temp_kritisk: %} style="color:red;"{% else: %} style="color:green;" {% endif %}> <strong>{{ temp_status }}</strong></span>
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white" style="background: -webkit-linear-gradient(left, #007bff, #dc3545);">
+                  Differanse PH
+                </div>
+                <div class="card-body">
+                  <strong>{{ diff_ph_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  <span {% if ph_kritisk: %} style="color:red;"{% else: %} style="color:green;" {% endif %}> <strong>{{ ph_status }}</strong></span>
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white" style="background: -webkit-linear-gradient(left, #007bff, #dc3545);">
+                  Differanse TDS
+                </div>
+                <div class="card-body">
+                  <strong>{{ diff_kond_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  <span {% if kond_kritisk: %} style="color:red;"{% else: %} style="color:green;" {% endif %}> <strong>{{ kond_status }}</strong></span>
+                </div>
+              </div>
+          </div>
+          <div class="col md-3">
+            <div class="card text-center">
+                <div class="card-header text-white" style="background: -webkit-linear-gradient(left, #007bff, #dc3545);">
+                  Differanse Turbiditet
+                </div>
+                <div class="card-body">
+                 <strong>{{ diff_turb_value }}</strong>
+                </div>
+                <div class="card-footer text-muted">
+                  <span {% if turb_kritisk: %} style="color:red;"{% else: %} style="color:green;" {% endif %}> <strong>{{ turb_status }}</strong></span>
+                </div>
+              </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="row">
+
+      <div id={{ chart1ID|safe }} class="col-md-6 chart1" style="height: 400px; width: 650px;"></div>
+      <!--  style="height: 400px; width: 650px;" -->
+      <script>
+        var chart1_id = {{ chart1ID|safe }}
+        var series1 = {{ series1|safe }}
+        var title1 = {{ title1|safe }}
+        var xAxis1 = {{ xAxis1|safe }}
+        var yAxis1 = {{ yAxis1|safe }}
+        var chart1 = {{ chart1|safe }}
+      </script>
+
+      <div id = {{ chart2ID|safe }} class="col-md-6 chart2" style="height: 400px; width: 650px;"></div>
+      <!--  style="height: 400px; width: 650px;" -->
+      <script>
+        var chart2_id = {{ chart2ID|safe }}
+        var series2 = {{ series2|safe }}
+        var title2 = {{ title2|safe }}
+        var xAxis2 = {{ xAxis2|safe }}
+        var yAxis2 = {{ yAxis2|safe }}
+        var chart2 = {{ chart2|safe }}
+      </script>
+
+      </div>
+      <div class="row">
+      <div id={{ chartID_turb|safe }} class="col-md-6 chart_turb" style="height: 400px; width: 650px;"></div>
+      <script>
+        var chart_turb_id = {{ chartID_turb|safe }}
+        var series_turb = {{ series_turb|safe }}
+        var title_turb = {{ title_turb|safe }}
+        var xAxis_turb = {{ xAxis_turb|safe }}
+        var yAxis_turb = {{ yAxis_turb|safe }}
+        var chart_turb = {{ chart_turb|safe }}
+      </script>
+
+      <div id={{ chartID_kond|safe }} class="col-md-6 chart_kond" style="height: 400px; width: 650px;"></div>
+      <script>
+        var chart_kond_id = {{ chartID_kond|safe }}
+        var series_kond = {{ series_kond|safe }}
+        var title_kond = {{ title_kond|safe }}
+        var xAxis_kond = {{ xAxis_kond|safe }}
+        var yAxis_kond = {{ yAxis_kond|safe }}
+        var chart_kond = {{ chart_kond|safe }}
+      </script>
+      </div>
+  </div>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<!--<script src="../static/graph.js"></script>-->
+<script src="{{url_for('static', filename='graph.js')}}"></script>
+
+
+<!-- Div til tabell -->
+<div class="container" style="max-width: 1400px;">
+  <div id="accordion">
+    <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h5 class="mb-0">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          <strong>{{ table_header }} <i class="fa fa-plus-square"></i></strong>
+        </button>
+      </h5>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+      <div class="card-body">
+        <div class="tabellholder">
+         <table class="table table-striped table-hover table-bordered">
+               <thead class="thead-dark">
+                 <tr>                                       
+                  {% if liten_periode: %}  <th scope="col">Dato</th>  {% endif %}
+                    <th scope="col">{{ col_one_name }}</th>
+                    <th scope="col">PH</th>
+                    <th scope="col">Temperatur</th>
+                    <th scope="col">TDS</th>
+                    <th scope="col">Konduktivitet</th>
+                  </tr>
+               </thead> 
+               <tbody>
+                {% for rad in dataset: %} 
+                    {% if month_or_period: %}
+                    <tr {% if rad[6] == 'n' %} style="background-color:#e5881d;" {% endif %}>
+                    <th><a href="{{ overviewURL[rad] }}">{{ overviewDATE[rad] }}</a></th>
+                    <th>{{ rad[2] }}</th>
+                    <th>{{ rad[3] }}</th>
+                    <th>{{ rad[4] }}</th>
+                    <th>{{ rad[5] }}</th> 
+
+                    {% elif liten_periode: %}
+                    <tr {% if rad[6] == 'n' %} style="background-color:#e5881d;" {% endif %}>
+                    <th>{{ rad[1] }}</th>
+                    <th>{{ rad[2] }}</th>
+                    <th>{{ rad[3] }}</th>
+                    <th>{{ rad[4] }}</th>
+                    <th>{{ rad[5] }}</th>  
+                    <th>{{ rad[6] }}</th>
+
+
+                    {% else: %}
+                    <tr {% if rad[7] == 'n' %} style="background-color:#e5881d;" {% endif %}>
+                    <th>{{ rad[2] }}</th>
+                    <th>{{ rad[3] }}</th>
+                    <th>{{ rad[4] }}</th>
+                    <th>{{ rad[5] }}</th>  
+                    <th>{{ rad[6] }}</th>
+                    {% endif %} 
+                  </tr> 
+                {% endfor %}
+               </tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+  </div>
+           
+  </div>
+</div>
+
+{% elif empty %}
+<div class="container" style="max-width: 1400px;"> 
+  <h5 style="margin-left: 40px; margin-top: 10px;  color: #aa0101;"> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>  {{ error_msg }}</h5>
+</div>
+{% endif %}
+</div>
+
+{% if not datastatus %}</div>{% endif %}
+</body>
+
+<!-- Styling til hovedsaklig animering av det som animeres -->
+<style type="text/css">
+ body {
+  background-color: white;
+  height:100%;
+ }
+ .tabellholder {
+  height: 500px;
+  overflow-y: scroll;
+ }
+ .velger {
+ 	margin-left: 40px;
+ }
+.pickers input {
+	margin: 10px;
+}
+/* Dato radio */
+#featured1:checked ~ .pickers .periodein {
+	-webkit-animation: swing-out-left-bck 0.3s cubic-bezier(0.600, -0.280, 0.735, 0.045) both; 
+	        animation: swing-out-left-bck 0.3s cubic-bezier(0.600, -0.280, 0.735, 0.045) both;
+}
+@-webkit-keyframes swing-out-left-bck {
+  0% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: rotateY(100deg);
+            transform: rotateY(100deg);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 0;
+  }
+}
+@keyframes swing-out-left-bck {
+  0% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 1;
+  }
+  100% {
+    -webkit-transform: rotateY(100deg);
+            transform: rotateY(100deg);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 0;
+  }
+}
+.mntslct {
+	max-width: 150px;
+}
+.pickers select {
+	display: inline;
+	margin-top: 7px;
+}
+#featured1:checked ~ .pickers .mntslct {
+	display: none;
+}
+
+#featured1:checked ~ .pickers .fra_title {
+	display: none;
+}
+#featured1:checked ~ .pickers .datoslide {
+	-webkit-animation: swing-in-left-fwd 0.6s cubic-bezier(0.175, 0.885, 0.320, 1.275) both;
+	        animation: swing-in-left-fwd 0.6s cubic-bezier(0.175, 0.885, 0.320, 1.275) both;
+}
+@-webkit-keyframes swing-in-left-fwd {
+  0% {
+    -webkit-transform: rotateY(100deg);
+            transform: rotateY(100deg);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 1;
+  }
+}
+@keyframes swing-in-left-fwd {
+  0% {
+    -webkit-transform: rotateY(100deg);
+            transform: rotateY(100deg);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    -webkit-transform-origin: left;
+            transform-origin: left;
+    opacity: 1;
+  }
+}
+#month:checked ~ .pickers .periodein {
+	display: none;
+}
+#month:checked ~ .pickers .shower {
+	display: none;
+}
+#month:checked ~ .pickers .datoslide {
+	display: none;
+}
+#month:checked ~ .pickers .mntslct {
+	-webkit-animation: flip-in-ver-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: flip-in-ver-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+@-webkit-keyframes flip-in-ver-right {
+  0% {
+    -webkit-transform: rotateY(-80deg);
+            transform: rotateY(-80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    opacity: 1;
+  }
+}
+@keyframes flip-in-ver-right {
+  0% {
+    -webkit-transform: rotateY(-80deg);
+            transform: rotateY(-80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+/* Periode radio */
+#featured-2:checked ~ .pickers .shower {
+	display:none;
+}
+#featured-2:checked ~ .pickers .mntslct {
+	display: none;
+}
+/*Animasjon til andre dato*/
+.periodein {
+	-webkit-animation:swing-in-left-fwd .5s cubic-bezier(.175,.885,.32,1.275) both;
+	animation:swing-in-left-fwd .5s cubic-bezier(.175,.885,.32,1.275) both
+}
+@-webkit-keyframes swing-in-left-fwd{0%{-webkit-transform:rotateY(100deg);transform:rotateY(100deg);-webkit-transform-origin:left;transform-origin:left;opacity:0}100%{-webkit-transform:rotateY(0);transform:rotateY(0);-webkit-transform-origin:left;transform-origin:left;opacity:1}}@keyframes swing-in-left-fwd{0%{-webkit-transform:rotateY(100deg);transform:rotateY(100deg);-webkit-transform-origin:left;transform-origin:left;opacity:0}100%{-webkit-transform:rotateY(0);transform:rotateY(0);-webkit-transform-origin:left;transform-origin:left;opacity:1}}
+
+
+.slidein{-webkit-animation:scale-up-hor-left .6s cubic-bezier(.39,.575,.565,1.000) both;animation:scale-up-hor-left .4s cubic-bezier(.39,.575,.565,1.000) both}
+@-webkit-keyframes scale-up-hor-left{0%{-webkit-transform:scaleX(.4);transform:scaleX(.4);-webkit-transform-origin:0 0;transform-origin:0 0}100%{-webkit-transform:scaleX(1);transform:scaleX(1);-webkit-transform-origin:0 0;transform-origin:0 0}}@keyframes scale-up-hor-left{0%{-webkit-transform:scaleX(.4);transform:scaleX(.4);-webkit-transform-origin:0 0;transform-origin:0 0}100%{-webkit-transform:scaleX(1);transform:scaleX(1);-webkit-transform-origin:0 0;transform-origin:0 0}}
+
+.fade-in {
+  -webkit-animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+          animation: fade-in 1.2s cubic-bezier(0.390, 0.575, 0.565, 1.000) both;
+}
+@-webkit-keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.tracking-in-expand {
+	-webkit-animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+	        animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+}
+@-webkit-keyframes tracking-in-expand {
+  0% {
+    letter-spacing: -0.5em;
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes tracking-in-expand {
+  0% {
+    letter-spacing: -0.5em;
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.flip-in-ver-right {
+	-webkit-animation: flip-in-ver-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+	        animation: flip-in-ver-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+@-webkit-keyframes flip-in-ver-right {
+  0% {
+    -webkit-transform: rotateY(-80deg);
+            transform: rotateY(-80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    opacity: 1;
+  }
+}
+@keyframes flip-in-ver-right {
+  0% {
+    -webkit-transform: rotateY(-80deg);
+            transform: rotateY(-80deg);
+    opacity: 0;
+  }
+  100% {
+    -webkit-transform: rotateY(0);
+            transform: rotateY(0);
+    opacity: 1;
+  }
+}
+
+.shake-horizontal {
+  -webkit-animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
+          animation: shake-horizontal 0.8s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
+}
+@-webkit-keyframes shake-horizontal {
+  0%,
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70% {
+    -webkit-transform: translateX(-10px);
+            transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60% {
+    -webkit-transform: translateX(10px);
+            transform: translateX(10px);
+  }
+  80% {
+    -webkit-transform: translateX(8px);
+            transform: translateX(8px);
+  }
+  90% {
+    -webkit-transform: translateX(-8px);
+            transform: translateX(-8px);
+  }
+}
+@keyframes shake-horizontal {
+  0%,
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70% {
+    -webkit-transform: translateX(-10px);
+            transform: translateX(-10px);
+  }
+  20%,
+  40%,
+  60% {
+    -webkit-transform: translateX(10px);
+            transform: translateX(10px);
+  }
+  80% {
+    -webkit-transform: translateX(8px);
+            transform: translateX(8px);
+  }
+  90% {
+    -webkit-transform: translateX(-8px);
+            transform: translateX(-8px);
+  }
+}
+
+
+</style>
+{% endblock %}
