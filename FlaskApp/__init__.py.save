@@ -1,0 +1,27 @@
+from flask import Flask, render_template, redirect, request, url_for
+import MySQLdb
+import os
+
+app = Flask(__name__)
+@app.route("/")
+def hello():
+    return "Gruppe 5 er best og skal vinne alle priser, halleljuah!"
+@app.route("/test")
+def test():
+    try:
+	conn = MySQLdb.connect(host = "localhost",user="jakob", password="", db="test")
+	cur = conn.cursor()
+
+	sql = "SELECT * FROM test"
+	cur.execute(sql)
+
+	dataset = cur.fetchall()
+	var = dataset[0]
+
+	return "dataset"
+    except Exception as e:
+	return str(e)
+
+
+if __name__ == "__main__":
+    app.run()
